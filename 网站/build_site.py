@@ -151,12 +151,12 @@ a.btn{text-decoration:none}
 .legend span{font-size:11.5px;color:#9A8790;display:flex;align-items:center;gap:5px}
 .legend b{width:12px;height:12px;border-radius:4px;display:inline-block}
 .flowbox{background:#fff;border-radius:16px;padding:14px 18px;margin-top:6px;box-shadow:0 6px 18px rgba(232,94,134,.07)}
-.flowbox summary{cursor:pointer;list-style:none;font-size:13.5px;font-weight:500;display:flex;align-items:center;color:#3E3037}
-.flowbox summary::-webkit-details-marker{display:none}
-.flowbox summary::before{content:"▸";font-size:11px;color:#B9ACB2;margin-right:7px}
-.flowbox[open] summary::before{content:"▾"}
-.flowbox summary::after{content:"点开";margin-left:auto;font-size:11px;color:#B9ACB2;font-weight:400}
-.flowbox[open] summary::after{content:"收起"}
+.flowbox > summary{cursor:pointer;list-style:none;font-size:13.5px;font-weight:500;display:flex;align-items:center;color:#3E3037}
+.flowbox > summary::-webkit-details-marker{display:none}
+.flowbox > summary::before{content:"▸";font-size:11px;color:#B9ACB2;margin-right:7px}
+.flowbox[open] > summary::before{content:"▾"}
+.flowbox > summary::after{content:"点开";margin-left:auto;font-size:11px;color:#B9ACB2;font-weight:400}
+.flowbox[open] > summary::after{content:"收起"}
 .tabs{display:flex;gap:8px;margin:8px 0 16px}
 .tabs a{flex:1;text-align:center;padding:11px 6px;border-radius:16px;background:#fff;color:#8B7B83;
   font-size:14px;box-shadow:0 6px 18px rgba(232,94,134,.07);white-space:nowrap}
