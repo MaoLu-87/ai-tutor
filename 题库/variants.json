@@ -1,0 +1,702 @@
+{
+  "版本": 1,
+  "说明": "变式训练题库。每一道都由「数学错题库/错题库.json」里的真实错题派生，考同一个知识点、换数字与情境。这是『药』；错题库是『病因』。id 规则 V-<派生自>-<序号>。",
+  "维护规则": {
+    "扩充": "每出现一道新错题，至少派生 2 道变式；每个知识点保底 3 道在库",
+    "淘汰": "连续 2 次复测一次答对 → 标 mastered，30 天后自动移出刷题池；超过 60 天没被抽到且所属知识点得分率 >90% → 移出",
+    "复用": "淘汰的题不删除，标 retired 留档，知识点回潮时可重新激活"
+  },
+  "题目": [
+    {
+      "id": "V-004-01",
+      "from": "M5A-004",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数",
+        "乘法分配律"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "一件上衣 m 元，一条裤子比上衣便宜 18 元。买 4 套这样的衣服（各一件），一共需要多少元？",
+      "options": [
+        "4m − 18",
+        "4(2m − 18)",
+        "8m − 72",
+        "4m + 18"
+      ],
+      "answer": 2,
+      "hint": "先算一套多少钱：上衣 m，裤子 m−18，一套就是 m+(m−18)。",
+      "explain": "一套 = m + (m−18) = 2m−18；4 套 = 4(2m−18) = 8m−72。选 A 是只算了「4 条裤子少花的钱」，选 B 是忘了乘 4。"
+    },
+    {
+      "id": "V-004-02",
+      "from": "M5A-004",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数",
+        "乘法分配律"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "一支笔 a 元，一本本子 b 元。买 6 支笔和 6 本本子，一共需要多少元？",
+      "options": [
+        "6ab",
+        "6(a + b)",
+        "6a + b",
+        "a + b + 6"
+      ],
+      "answer": 1,
+      "hint": "6 支笔和 6 本本子，可以先把「一支笔加一本本子」看成一套。",
+      "explain": "一套 = a+b，6 套 = 6(a+b) = 6a+6b。写成 6ab 是把钱数和件数乘在一起了，量纲不对。"
+    },
+    {
+      "id": "V-005-01",
+      "from": "M5A-005",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数",
+        "运算定律"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "下面各式中，正确的是：",
+      "options": [
+        "2(x + 3) = 2x + 3",
+        "2(x + 3) = 2x + 6",
+        "2(x + 3) = x + 6",
+        "2(x + 3) = 2x + 3x"
+      ],
+      "answer": 1,
+      "hint": "括号外的数，要乘括号里的每一项，一项都不能漏。",
+      "explain": "2 要分别乘 x 和 3，得 2x+6。选 A 是只乘了第一项（最常见）；选 C 是把 2 只乘了 3；选 D 把加号当成了乘号。"
+    },
+    {
+      "id": "V-005-02",
+      "from": "M5A-005",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数",
+        "乘法分配律"
+      ],
+      "type": "number",
+      "difficulty": 2,
+      "stem": "当 a = 5 时，3(a + 2) 的值是多少？",
+      "answer": 21,
+      "hint": "先把括号里的加法算出来，再乘。",
+      "explain": "a+2 = 7，3×7 = 21。若算成 15+2=17，就是只把 3 乘了 a，漏乘了 2。"
+    },
+    {
+      "id": "V-006-01",
+      "from": "M5A-006",
+      "subject": "数",
+      "unit": "U1",
+      "kps": [
+        "积的近似数",
+        "小数乘法"
+      ],
+      "type": "number",
+      "difficulty": 2,
+      "stem": "2.7 × 0.35 = 0.945。保留两位小数约是多少？",
+      "answer": 0.95,
+      "hint": "看小数点后第三位，是 5，要往前一位进 1。",
+      "explain": "0.945 的第三位是 5，四舍五入进一位 → 0.95。注意是 0.95 不是 0.94。"
+    },
+    {
+      "id": "V-006-02",
+      "from": "M5A-006",
+      "subject": "数",
+      "unit": "U1",
+      "kps": [
+        "积的近似数"
+      ],
+      "type": "choice",
+      "difficulty": 1,
+      "stem": "2.7 × 0.35 的积是几位小数？",
+      "options": [
+        "两位",
+        "三位",
+        "四位",
+        "无法确定"
+      ],
+      "answer": 1,
+      "hint": "两个因数各有几位小数？加起来。",
+      "explain": "2.7 一位小数，0.35 两位小数，一共三位 → 0.945。数位数这一步对了，后面取近似才不会错。"
+    },
+    {
+      "id": "V-007-01",
+      "from": "M5A-007",
+      "subject": "数",
+      "unit": "U1",
+      "kps": [
+        "同级运算顺序"
+      ],
+      "type": "number",
+      "difficulty": 2,
+      "stem": "0.2 × 0.5 ÷ 0.2 × 0.5 =",
+      "answer": 0.25,
+      "hint": "乘除同级，从左往右一步一步算，不能先约掉。",
+      "explain": "0.2×0.5=0.1 → 0.1÷0.2=0.5 → 0.5×0.5=0.25。若把 ÷0.2×0.5 当成抵消，会得出 0.1 或 1。"
+    },
+    {
+      "id": "V-007-02",
+      "from": "M5A-007",
+      "subject": "数",
+      "unit": "U1",
+      "kps": [
+        "同级运算顺序"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "4.8 ÷ 0.6 × 0.5 的得数是：",
+      "options": [
+        "4",
+        "16",
+        "0.4",
+        "8"
+      ],
+      "answer": 0,
+      "hint": "先算 4.8÷0.6，再乘 0.5。",
+      "explain": "4.8÷0.6 = 8，8×0.5 = 4。若先算 0.6×0.5=0.3 再除，会得到 16——这就是「先算后面」的错。"
+    },
+    {
+      "id": "V-009-01",
+      "from": "M5A-009",
+      "subject": "数",
+      "unit": "U1",
+      "kps": [
+        "小数乘法",
+        "小数点定位"
+      ],
+      "type": "number",
+      "difficulty": 2,
+      "stem": "一块菜地长 2.4 m、宽 0.35 m，面积是多少平方米？",
+      "answer": 0.84,
+      "hint": "先按 24×35 算，再数两个因数一共几位小数。",
+      "explain": "24×35=840，两个因数共三位小数 → 0.840 = 0.84。算完用估算验：2.4×0.35 ≈ 2×0.4 = 0.8，对得上。"
+    },
+    {
+      "id": "V-009-02",
+      "from": "M5A-009",
+      "subject": "数",
+      "unit": "U1",
+      "kps": [
+        "小数乘法",
+        "小数点定位"
+      ],
+      "type": "number",
+      "difficulty": 2,
+      "stem": "0.45 × 0.6 =",
+      "answer": 0.27,
+      "hint": "45×6=270，再数一共几位小数。",
+      "explain": "两位 + 一位 = 三位 → 0.270 = 0.27。若写成 2.7 或 27，都是小数点位置错了。"
+    },
+    {
+      "id": "V-010-01",
+      "from": "M5A-010",
+      "subject": "数",
+      "unit": "U3",
+      "kps": [
+        "商的近似数",
+        "小数除法"
+      ],
+      "type": "number",
+      "difficulty": 3,
+      "stem": "3.876 ÷ 1.2 ≈（得数保留两位小数）",
+      "answer": 3.23,
+      "hint": "除到小数点后第三位，再看第三位要不要进。",
+      "explain": "3.876÷1.2 = 3.23。刚好三位，取两位看第三位是 0，舍去 → 3.23。若算出 3.2 就是没除到底。"
+    },
+    {
+      "id": "V-010-02",
+      "from": "M5A-010",
+      "subject": "数",
+      "unit": "U3",
+      "kps": [
+        "商的近似数"
+      ],
+      "type": "choice",
+      "difficulty": 3,
+      "stem": "7.8 ÷ 0.6 的商保留一位小数，应写作：",
+      "options": [
+        "13",
+        "13.0",
+        "13.00",
+        "1.3"
+      ],
+      "answer": 1,
+      "hint": "保留一位小数，就要写到小数点后一位，末尾的 0 不能省。",
+      "explain": "7.8÷0.6 = 13，保留一位小数写 13.0。写 13 是没按要求保留位数；写 1.3 是小数点错了。"
+    },
+    {
+      "id": "V-008-01",
+      "from": "M5A-008",
+      "subject": "数",
+      "unit": "U3",
+      "kps": [
+        "小数除法·解决问题",
+        "审题"
+      ],
+      "type": "number",
+      "difficulty": 3,
+      "stem": "一杯 0.4 kg 的水中加入 0.1 kg 糖。糖水的质量是糖的多少倍？",
+      "answer": 5,
+      "hint": "糖水 = 水 + 糖。先算糖水有多重。",
+      "explain": "糖水 = 0.4+0.1 = 0.5 kg，0.5÷0.1 = 5 倍。若用 0.4÷0.1 = 4，是把「水」当成了「糖水」。"
+    },
+    {
+      "id": "V-008-02",
+      "from": "M5A-008",
+      "subject": "数",
+      "unit": "U3",
+      "kps": [
+        "小数减法·解决问题"
+      ],
+      "type": "number",
+      "difficulty": 2,
+      "stem": "一瓶果汁连瓶重 0.85 kg，空瓶重 0.15 kg。果汁净重多少千克？",
+      "answer": 0.7,
+      "hint": "连瓶重 = 果汁 + 瓶。要求果汁，就用连瓶重减瓶重。",
+      "explain": "0.85 − 0.15 = 0.7 kg。这题和盐水题是同一类：先分清「整体」和「部分」再动笔。"
+    },
+    {
+      "id": "V-004-03",
+      "from": "M5A-004",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "一个两位数，十位数字是 a，个位数字是 b。这个两位数可以表示成：",
+      "options": [
+        "ab",
+        "a + b",
+        "10a + b",
+        "10b + a"
+      ],
+      "answer": 2,
+      "hint": "十位上的 a 表示 a 个十，不是一个 a。",
+      "explain": "十位 a 值 10a，个位 b 值 b，所以是 10a+b。写成 ab 是把位值当成了乘法，这是字母式里最常见的错。"
+    },
+    {
+      "id": "V-004-04",
+      "from": "M5A-004",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数",
+        "两位数位值"
+      ],
+      "type": "number",
+      "difficulty": 2,
+      "stem": "一个两位数，十位是 a、个位是 b，可表示成 10a+b。当 a=3、b=7 时，这个数是多少？",
+      "answer": 37,
+      "hint": "把 a、b 代进去算：10×3 + 7。",
+      "explain": "10×3+7 = 37。如果把 10a+b 当成 a×b，会算出 21，那是两个数字相乘，不是两位数。"
+    },
+    {
+      "id": "V-003-01",
+      "from": "M5A-003",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数",
+        "面积"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "大正方形边长 a，中间挖去一个边长 b 的小正方形。剩下阴影部分的面积是：",
+      "options": [
+        "a² − b²",
+        "a² + b²",
+        "(a − b)²",
+        "ab"
+      ],
+      "answer": 0,
+      "hint": "先算大正方形，再减掉挖走的那块。",
+      "explain": "阴影 = 大 − 小 = a² − b²。若选 (a−b)²，那是把两个正方形画在了一起；a=5、b=3 时，a²−b²=16，(a−b)²=4，差很远。"
+    },
+    {
+      "id": "V-002-01",
+      "from": "M5A-002",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数",
+        "周长"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "一个长方形的长是 a+10，宽是 10。它的周长是：",
+      "options": [
+        "2(a + 10)",
+        "2a + 40",
+        "a + 20",
+        "10a + 20"
+      ],
+      "answer": 1,
+      "hint": "周长 =（长 + 宽）× 2，先把长和宽加起来。",
+      "explain": "(a+10+10)×2 = (a+20)×2 = 2a+40。选 2(a+10) 是漏了另一条宽；选 10a+20 是把面积 10a 当成了长度。"
+    },
+    {
+      "id": "V-001-01",
+      "from": "M5A-001",
+      "subject": "数",
+      "unit": "U5",
+      "kps": [
+        "用字母表示数",
+        "数量关系"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "甲长方形面积是 10a，乙正方形面积是 100。两个图形的面积相差多少？",
+      "options": [
+        "100",
+        "100 − 10a",
+        "100 + 10a",
+        "10a − 100"
+      ],
+      "answer": 1,
+      "hint": "「相差」就是大数减小数，先看清哪个大。",
+      "explain": "小学阶段默认 a<10，所以 100 更大：100 − 10a。若答 100，那是把「差」算成了「乙自己的面积」——M5A-001 的原始错法。"
+    },
+    {
+      "id": "V-E001-01",
+      "from": "E5A-001",
+      "subject": "英",
+      "unit": "ZT",
+      "kps": [
+        "语音·字母组合 ow"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "选出 ow 读音与其他三个不同的一项：",
+      "options": [
+        "cow",
+        "flower",
+        "snow",
+        "down"
+      ],
+      "answer": 2,
+      "hint": "想想哪个词的意思是「下雪」，它的 ow 是不是读起来不一样？",
+      "explain": "snow 的 ow 读 /əʊ/，其余读 /aʊ/。ow 分两派：cow/now/how/down/flower 是 /aʊ/；snow/grow/know/show/window 是 /əʊ/。"
+    },
+    {
+      "id": "V-E001-02",
+      "from": "E5A-002",
+      "subject": "英",
+      "unit": "ZT",
+      "kps": [
+        "语音·字母组合 ou"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "选出 ou 读音与其他三个不同的一项：",
+      "options": [
+        "house",
+        "mouth",
+        "young",
+        "cloud"
+      ],
+      "answer": 2,
+      "hint": "young 是「年轻的」，这个词的 ou 读得很短。",
+      "explain": "young 的 ou 读 /ʌ/，其余读 /aʊ/。ou 的 /ʌ/ 只有少数几个：young、cousin、country、trouble，记住这四个就够。"
+    },
+    {
+      "id": "V-E003-01",
+      "from": "E5A-003",
+      "subject": "英",
+      "unit": "YF",
+      "kps": [
+        "主谓一致·否定句"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "选择正确的词填空：They ______ like maths. 　",
+      "options": [
+        "don't",
+        "doesn't",
+        "isn't"
+      ],
+      "answer": 0,
+      "hint": "先看主语是 they 还是 he/she/it。",
+      "explain": "主语 They 是复数，用 don't。只有 he/she/it 才用 doesn't。口诀：I/you/we/they 用 don't。"
+    },
+    {
+      "id": "V-E004-01",
+      "from": "E5A-004",
+      "subject": "英",
+      "unit": "YF",
+      "kps": [
+        "第三人称单数"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "My sister often ______ TV after dinner. 选正确的形式：",
+      "options": [
+        "watch",
+        "watches",
+        "watching"
+      ],
+      "answer": 1,
+      "hint": "主语是 My sister，一个人。",
+      "explain": "主语 My sister 是第三人称单数，often 表示一般现在时，动词加 -es → watches。看到 often/usually/every day，先问「主语是谁」。"
+    },
+    {
+      "id": "V-E005-01",
+      "from": "E5A-005",
+      "subject": "英",
+      "unit": "ZC",
+      "kps": [
+        "单词拼写"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "「有帮助的」正确拼写是：",
+      "options": [
+        "heaupful",
+        "helpful",
+        "helpfull",
+        "helphul"
+      ],
+      "answer": 1,
+      "hint": "它是 help + ful 拼起来的。",
+      "explain": "helpful = help + ful。-ful 是常见后缀（careful、useful、beautiful），只加一个 l。长词记「词根 + 后缀」，不要整词硬背。"
+    },
+    {
+      "id": "V-E006-01",
+      "from": "E5A-006",
+      "subject": "英",
+      "unit": "YF",
+      "kps": [
+        "代词·宾格"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "The books are new. I like ______ very much.",
+      "options": [
+        "it",
+        "them",
+        "they"
+      ],
+      "answer": 1,
+      "hint": "books 是几个？",
+      "explain": "books 是复数，代词用 them。they 是主格（做主语），这里做宾语要用宾格 them。"
+    },
+    {
+      "id": "V-C001-01",
+      "from": "C5A-001",
+      "subject": "语",
+      "unit": "ZT",
+      "kps": [
+        "成语运用"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "下列句子中，成语使用恰当的一项是：",
+      "options": [
+        "他做事小心翼翼，从不马虎。",
+        "教室里人声鼎沸，同学们都在安静看书。",
+        "这道题很简单，他却冥思苦想了很久。",
+        "他经常不耻下问地向老师请教。"
+      ],
+      "answer": 0,
+      "hint": "把成语放回句子里读一遍，看它和句子的意思打不打架。",
+      "explain": "B「人声鼎沸」和「安静」矛盾；C「冥思苦想」不能形容简单的题；D「不耻下问」是向地位低的人请教，不能用于向老师请教。成语题考的是「词义 + 语境」是否匹配。"
+    },
+    {
+      "id": "V-C001-02",
+      "from": "C5A-001",
+      "subject": "语",
+      "unit": "ZT",
+      "kps": [
+        "成语运用"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "「不耻下问」应该用在下面哪种情况？",
+      "options": [
+        "向老师请教难题",
+        "向成绩不如自己的同学请教",
+        "向书本请教",
+        "向上级请教"
+      ],
+      "answer": 1,
+      "hint": "「下」指的是地位或水平比自己低。",
+      "explain": "「不耻下问」指向地位、学问不如自己的人请教而不觉得羞耻。用错对象是这类成语最常见的错法。"
+    },
+    {
+      "id": "V-C002-01",
+      "from": "C5A-002",
+      "subject": "语",
+      "unit": "JZ",
+      "kps": [
+        "修辞·打比方"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "下面哪一句用了「打比方」？",
+      "options": [
+        "比如下雨天，我们就在教室里看书。",
+        "秋天的落叶像一只只黄蝴蝶，打着旋儿落下来。",
+        "落叶很多，扫了一整个下午。",
+        "叶子黄了，天气也凉了。"
+      ],
+      "answer": 1,
+      "hint": "打比方一定会有「像、好像、仿佛」这类词，而且是拿一个东西比另一个东西。",
+      "explain": "A 是「举例」（比如），不是比喻；B 有「像」，把落叶比作黄蝴蝶，是打比方。判断口诀：有「像」+ 两样不同的事物 = 比喻。"
+    },
+    {
+      "id": "V-C005-01",
+      "from": "C5A-005",
+      "subject": "语",
+      "unit": "YD",
+      "kps": [
+        "说明文·说明方法"
+      ],
+      "type": "choice",
+      "difficulty": 2,
+      "stem": "「鲸的一条舌头就有十几头大肥猪那么重」用了哪两种说明方法？",
+      "options": [
+        "列数字、打比方",
+        "列数字、作比较",
+        "作比较、举例子",
+        "打比方、举例子"
+      ],
+      "answer": 1,
+      "hint": "「十几头」是数字；把舌头和大肥猪放在一起，是在干什么？",
+      "explain": "「十几头」是列数字，「和大肥猪一样重」是作比较。四种说明方法看标志：有数字＝列数字；两个东西比＝作比较；有「像」＝打比方；说「例如」＝举例子。"
+    },
+    {
+      "id": "V-C005-02",
+      "from": "C5A-006",
+      "subject": "语",
+      "unit": "YD",
+      "kps": [
+        "说明文·语言准确性"
+      ],
+      "type": "choice",
+      "difficulty": 3,
+      "stem": "「这座桥建于公元 605 年左右。」句中「左右」能否删去？",
+      "options": [
+        "能，删了更简洁",
+        "不能，删后就变成确切的 605 年，与史实不符",
+        "能，反正意思差不多",
+        "不能，因为「左右」是形容词"
+      ],
+      "answer": 1,
+      "hint": "这类题有四步：表态、释词、反证、收口。",
+      "explain": "标准答法：不能删。「左右」表示估计，说明是大概年份；删去后变成确定的 605 年，与事实不符，体现说明文语言的准确性。四句话缺一句扣一分。"
+    },
+    {
+      "id": "V-C007-01",
+      "from": "C5A-007",
+      "subject": "语",
+      "unit": "YD",
+      "kps": [
+        "审题·拟题"
+      ],
+      "type": "choice",
+      "difficulty": 1,
+      "stem": "给一篇写「竹子不是树」的说明文拟题，题目要求不能用原标题。下面哪个符合要求？",
+      "options": [
+        "竹子不是树",
+        "竹子并不是树",
+        "会「长个儿」的草",
+        "论竹子的植物学分类"
+      ],
+      "answer": 2,
+      "hint": "A 和 B 只是换了说法，意思还是原标题。",
+      "explain": "A 是原题，B 换个说法仍然是原题，D 不像小学生拟的题。C 抓特点、有画面，符合要求。拟题先圈出限制条件，再动笔。"
+    },
+    {
+      "id": "V-L-01",
+      "from": "E5A-007",
+      "subject": "英",
+      "unit": "TL",
+      "kps": [
+        "听力·抓疑问词"
+      ],
+      "type": "listening",
+      "difficulty": 2,
+      "script": "What do you have on Mondays?",
+      "stem": "听录音，选出正确的答语。",
+      "options": [
+        "I often read books.",
+        "We have maths and music.",
+        "It's Monday."
+      ],
+      "answer": 1,
+      "hint": "先听疑问句的第一个词——是 What 还是 When？",
+      "explain": "问句是 What do you have on Mondays?（周一上什么课），答语要答「有什么课」→ We have maths and music。A 答的是「做什么」，C 答的是「星期几」。"
+    },
+    {
+      "id": "V-L-02",
+      "from": "E5A-004",
+      "subject": "英",
+      "unit": "TL",
+      "kps": [
+        "听力·信息记录"
+      ],
+      "type": "listening",
+      "difficulty": 2,
+      "script": "Mike often plays football after school.",
+      "stem": "听录音，选出与你听到的内容相符的一句。",
+      "options": [
+        "Mike often plays basketball after school.",
+        "Mike often plays football after school.",
+        "Mike often reads books after school."
+      ],
+      "answer": 1,
+      "hint": "注意听球类那个词。",
+      "explain": "录音说的是 football。听的时候要抓住关键词，不要凭印象选——这类题最容易把 basketball 和 football 听混。"
+    },
+    {
+      "id": "V-L-03",
+      "from": "E5A-001",
+      "subject": "英",
+      "unit": "TL",
+      "kps": [
+        "听力·语音辨识"
+      ],
+      "type": "listening",
+      "difficulty": 2,
+      "script": "Thursday",
+      "stem": "听录音，选出你听到的单词。",
+      "options": [
+        "Tuesday",
+        "Thursday",
+        "thirsty"
+      ],
+      "answer": 1,
+      "hint": "注意中间是 -urs- 还是 -ues-。",
+      "explain": "Thursday /ˈθɜːzdeɪ/ 是星期四。Tuesday 是星期二，thirsty 是口渴的，三个词开头都像，靠中间的音区分。"
+    },
+    {
+      "id": "V-L-04",
+      "from": "E5A-007",
+      "subject": "英",
+      "unit": "TL",
+      "kps": [
+        "听力·信息记录"
+      ],
+      "type": "listening",
+      "difficulty": 2,
+      "script": "I get up at six thirty in the morning.",
+      "stem": "听录音，选出你听到的时间。",
+      "options": [
+        "6:00",
+        "6:30",
+        "7:30"
+      ],
+      "answer": 1,
+      "hint": "six 后面还有一个词。",
+      "explain": "six thirty = 6:30。听时间要听全，只听到 six 就选 6:00 是最常见的错。"
+    }
+  ]
+}

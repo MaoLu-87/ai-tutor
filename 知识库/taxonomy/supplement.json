@@ -1,0 +1,332 @@
+[
+ {
+  "id": "Q-SUP-01",
+  "subject": "数",
+  "kps": [
+   "一个数乘分数"
+  ],
+  "kp": "cnm_p178",
+  "book": "6上",
+  "type": "choice",
+  "stem": "3/4 × 8 = （　）",
+  "options": [
+   "6",
+   "8",
+   "3",
+   "24"
+  ],
+  "answer": 0,
+  "explain": "分数乘整数：分母不变，分子乘整数。3×8=24，24÷4=6。",
+  "difficulty": 3,
+  "level": "basic",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-02",
+  "subject": "数",
+  "kps": [
+   "一个数乘分数"
+  ],
+  "kp": "cnm_p178",
+  "book": "6上",
+  "type": "choice",
+  "stem": "2/3 × 3/4 = （　）",
+  "options": [
+   "1/2",
+   "5/7",
+   "3/8",
+   "6/7"
+  ],
+  "answer": 0,
+  "explain": "分子乘分子、分母乘分母：6/12。约分得 1/2。",
+  "difficulty": 5,
+  "level": "standard",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-03",
+  "subject": "数",
+  "kps": [
+   "一个数乘分数"
+  ],
+  "kp": "cnm_p178",
+  "book": "6上",
+  "type": "choice",
+  "stem": "一袋米重 12 千克，吃了这袋米的 1/3。吃了多少千克？",
+  "options": [
+   "4 千克",
+   "3 千克",
+   "8 千克",
+   "36 千克"
+  ],
+  "answer": 0,
+  "explain": "求一个数的几分之几用乘法：12 × 1/3 = 4（千克）。别把 1/3 当成吃了 3 千克。",
+  "difficulty": 7,
+  "level": "challenge",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-04",
+  "subject": "数",
+  "kps": [
+   "约分"
+  ],
+  "kp": "cnm_p168",
+  "book": "5下",
+  "type": "choice",
+  "stem": "6/8 约成最简分数是（　）",
+  "options": [
+   "3/4",
+   "2/3",
+   "6/8",
+   "1/2"
+  ],
+  "answer": 0,
+  "explain": "分子分母同时除以公因数 2：6÷2=3，8÷2=4，得 3/4。",
+  "difficulty": 3,
+  "level": "basic",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-05",
+  "subject": "数",
+  "kps": [
+   "约分"
+  ],
+  "kp": "cnm_p168",
+  "book": "5下",
+  "type": "choice",
+  "stem": "12/18 约成最简分数是（　）",
+  "options": [
+   "2/3",
+   "3/4",
+   "1/2",
+   "4/5"
+  ],
+  "answer": 0,
+  "explain": "先找最大公因数 6：12÷6=2，18÷6=3，得 2/3。一次除到最简，比分步除更稳。",
+  "difficulty": 5,
+  "level": "standard",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-06",
+  "subject": "数",
+  "kps": [
+   "约分"
+  ],
+  "kp": "cnm_p168",
+  "book": "5下",
+  "type": "choice",
+  "stem": "45/60 约成最简分数是（　）",
+  "options": [
+   "3/4",
+   "5/6",
+   "4/5",
+   "2/3"
+  ],
+  "answer": 0,
+  "explain": "最大公因数是 15：45÷15=3，60÷15=4。数大时可以先除 5 再除 3，分两步也不容易错。",
+  "difficulty": 7,
+  "level": "challenge",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-07",
+  "subject": "数",
+  "kps": [
+   "同分母分数的加减法"
+  ],
+  "kp": "cnm_p080",
+  "book": "3上",
+  "type": "choice",
+  "stem": "2/5 + 1/5 = （　）",
+  "options": [
+   "3/5",
+   "3/10",
+   "2/5",
+   "1/5"
+  ],
+  "answer": 0,
+  "explain": "同分母相加：分母不变，分子相加。2+1=3，得 3/5。别把分母也加起来。",
+  "difficulty": 3,
+  "level": "basic",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-08",
+  "subject": "数",
+  "kps": [
+   "同分母分数的加减法"
+  ],
+  "kp": "cnm_p080",
+  "book": "3上",
+  "type": "choice",
+  "stem": "7/9 − 4/9 = （　）",
+  "options": [
+   "1/3",
+   "3/18",
+   "11/9",
+   "1/9"
+  ],
+  "answer": 0,
+  "explain": "分母不变、分子相减：3/9。3/9 要约成 1/3，答完记得看能不能约分。",
+  "difficulty": 5,
+  "level": "standard",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-09",
+  "subject": "数",
+  "kps": [
+   "同分母分数的加减法"
+  ],
+  "kp": "cnm_p080",
+  "book": "3上",
+  "type": "choice",
+  "stem": "3/8 + 5/8 = （　）",
+  "options": [
+   "1",
+   "15/8",
+   "8/16",
+   "2"
+  ],
+  "answer": 0,
+  "explain": "3+5=8，得 8/8，也就是 1。分子分母相同时这个分数就等于 1。",
+  "difficulty": 7,
+  "level": "challenge",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-10",
+  "subject": "数",
+  "kps": [
+   "异分母分数加减"
+  ],
+  "kp": "cnm_p173",
+  "book": "5下",
+  "type": "choice",
+  "stem": "1/2 + 1/4 = （　）",
+  "options": [
+   "3/4",
+   "2/6",
+   "1/6",
+   "2/4"
+  ],
+  "answer": 0,
+  "explain": "先通分：1/2 = 2/4，2/4 + 1/4 = 3/4。分母不同不能直接加分子。",
+  "difficulty": 3,
+  "level": "basic",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-11",
+  "subject": "数",
+  "kps": [
+   "异分母分数加减"
+  ],
+  "kp": "cnm_p173",
+  "book": "5下",
+  "type": "choice",
+  "stem": "2/3 − 1/6 = （　）",
+  "options": [
+   "1/2",
+   "1/3",
+   "1/6",
+   "2/3"
+  ],
+  "answer": 0,
+  "explain": "通分到分母 6：2/3 = 4/6，4/6 − 1/6 = 3/6 = 1/2。",
+  "difficulty": 5,
+  "level": "standard",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-12",
+  "subject": "数",
+  "kps": [
+   "异分母分数加减"
+  ],
+  "kp": "cnm_p173",
+  "book": "5下",
+  "type": "choice",
+  "stem": "1/2 + 1/3 + 1/6 = （　）",
+  "options": [
+   "1",
+   "3/11",
+   "2/3",
+   "5/6"
+  ],
+  "answer": 0,
+  "explain": "三个分母的最小公倍数是 6：3/6 + 2/6 + 1/6 = 6/6 = 1。别把分母直接相加成 11。",
+  "difficulty": 7,
+  "level": "challenge",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-13",
+  "subject": "数",
+  "kps": [
+   "分数除以整数"
+  ],
+  "kp": "cnm_p182",
+  "book": "6上",
+  "type": "choice",
+  "stem": "4/5 ÷ 2 = （　）",
+  "options": [
+   "2/5",
+   "8/5",
+   "4/3",
+   "1/5"
+  ],
+  "answer": 0,
+  "explain": "分数除以整数，等于乘这个整数的倒数：4/5 × 1/2 = 2/5。",
+  "difficulty": 3,
+  "level": "basic",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-14",
+  "subject": "数",
+  "kps": [
+   "分数除以整数"
+  ],
+  "kp": "cnm_p182",
+  "book": "6上",
+  "type": "choice",
+  "stem": "3/4 ÷ 3 = （　）",
+  "options": [
+   "1/4",
+   "9/4",
+   "1/3",
+   "3/7"
+  ],
+  "answer": 0,
+  "explain": "3/4 × 1/3 = 3/12 = 1/4。也可以直接把分子除以 3：3÷3=1，得 1/4。",
+  "difficulty": 5,
+  "level": "standard",
+  "source": "补充"
+ },
+ {
+  "id": "Q-SUP-15",
+  "subject": "数",
+  "kps": [
+   "分数除以整数"
+  ],
+  "kp": "cnm_p182",
+  "book": "6上",
+  "type": "choice",
+  "stem": "6/7 ÷ 3 = （　）",
+  "options": [
+   "2/7",
+   "18/7",
+   "3/7",
+   "1/7"
+  ],
+  "answer": 0,
+  "explain": "6/7 × 1/3 = 6/21 = 2/7。分子能被整除时，直接除分子更快：6÷3=2。",
+  "difficulty": 7,
+  "level": "challenge",
+  "source": "补充"
+ }
+]

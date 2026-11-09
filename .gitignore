@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+
+# 构建产物（跑 build_site.py 会重新生成）
+刷题/app/
+题库/index.json
+刷题/drill-bank.json
+知识库/scores.json
+题库/due.json
+题库/week.json
+
+# 这几个文件先以空壳提交，保证开箱能跑。
+# 一旦填了你自己孩子的数据，记得把它们加回这里。
+# 题库/attempts.json
+# 题库/checkin.json
+# 题库/pace.json
+# 题库/done.json
+题库/cloud_latest.json
