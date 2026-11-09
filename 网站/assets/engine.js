@@ -309,6 +309,28 @@ window.Engine = (function () {
     var longest = 0;
     days.forEach(function (d) { longest = Math.max(longest, streakTo(d)); });
 
+    // 每天明细：日历 / 流水前端重画时要用（否则只能靠构建时快照）
+    var paperN = {};
+    (attempts || []).filter(function (a) { return a.mode === "paper"; }).forEach(function (a) {
+      paperN[a.at] = (paperN[a.at] || 0) + 1;
+    });
+    var dayStat = {};
+    Object.keys(byDay).forEach(function (d) {
+      var x = byDay[d];
+      dayStat[d] = {
+        n: x.n, ok: x.ok, rate: x.n ? x.ok / x.n : null,
+        star: earned[d] || 0, streak: streakAt[d] || 0,
+        perfect: !!perfectByDay[d], checked: !!checked[d],
+        perfectGroups: perfectCount[d] || 0, paperN: paperN[d] || 0
+      };
+    });
+    // 只交过纸笔、当天没刷题的日子也要能画出来
+    Object.keys(paperN).forEach(function (d) {
+      if (dayStat[d]) return;
+      dayStat[d] = { n: 0, ok: 0, rate: null, star: earned[d] || 0, streak: streakAt[d] || 0,
+                     perfect: false, checked: !!checked[d], perfectGroups: 0, paperN: paperN[d] };
+    });
+
     var todayStar = checked[today] ? (earned[today] || 0) : Math.min(cur + 1, MAX_STAR_PER_DAY);
     var todayMax = Math.min(cur + 1, MAX_STAR_PER_DAY);
     var day = byDay[today] || { n: 0, ok: 0 };
@@ -329,7 +351,9 @@ window.Engine = (function () {
       bonusTotal: bonusTotal,
       earned: earned,
       perfectByDay: perfectByDay,
-      checkedDays: checked
+      perfectGroups: perfectCount,
+      checkedDays: checked,
+      dayStat: dayStat
     };
   }
 
@@ -734,7 +758,8 @@ window.Engine = (function () {
           if (r <= 0) { pickKp = kpIds[i]; break; }
         }
         var arr = byKp[pickKp].filter(function (v) {
-          return chosen.indexOf(v) < 0;
+          // usedIds 里的是逾期阶段已经选走的，不能再选一次（否则同一道题会出现两遍）
+          return chosen.indexOf(v) < 0 && !usedIds[v.id];
         });
         if (!arr.length) { wt[pickKp] = 0; continue; }
         // 组内随机，近期做过的不优先
