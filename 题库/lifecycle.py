@@ -22,7 +22,8 @@ MILESTONES = [1, 7, 21]  # 天
 
 
 def load():
-    att = json.load(open(ATTEMPTS, encoding="utf-8"))["记录"]
+    att = json.load(open(ATTEMPTS, encoding="utf-8"))["记录"] if os.path.exists(ATTEMPTS) else []
+    if not att: print("⚠ 本地 attempts.json 已删除（2026-11-09 起不再回流云端记录），按空记录处理。")
     idx = json.load(open(INDEX, encoding="utf-8"))["题目"]
     return att, {i["id"]: i for i in idx}
 

@@ -41,7 +41,9 @@ MAX_SUB_DELTA = float(_T.get("单日单科最大变动", 15))   # 单日单科�
 def load():
     k = json.load(open(KPS, encoding="utf-8"))
     items = json.load(open(os.path.join(ROOT, "题库", "index.json"), encoding="utf-8"))["题目"]
-    att = json.load(open(os.path.join(ROOT, "题库", "attempts.json"), encoding="utf-8"))["记录"]
+    _p = os.path.join(ROOT, "题库", "attempts.json")
+    att = json.load(open(_p, encoding="utf-8"))["记录"] if os.path.exists(_p) else []
+    if not att: print("⚠ 本地 attempts.json 已删除（2026-11-09 起不再回流云端记录），按空记录处理。")
     return k, items, att
 
 

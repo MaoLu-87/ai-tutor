@@ -35,7 +35,8 @@ _BONUS = _T.get("全对奖励", {})
 
 
 def load_days():
-    att = json.load(open(ATT, encoding="utf-8"))["记录"]
+    att = json.load(open(ATT, encoding="utf-8"))["记录"] if os.path.exists(ATT) else []
+    if not att: print("⚠ 本地 attempts.json 已删除（2026-11-09 起不再回流云端记录），按空记录处理。")
     days, sessions = {}, {}
     for r in att:
         d = r.get("at")
@@ -103,7 +104,7 @@ def main():
     ap.add_argument("--add", default="", help="补录一条提取：YYYY-MM-DD:星星数[:备注]")
     a = ap.parse_args()
 
-    att_raw = json.load(open(ATT, encoding="utf-8"))["记录"]
+    att_raw = json.load(open(ATT, encoding="utf-8"))["记录"] if os.path.exists(ATT) else []
     bonus, perfect = group_bonus(att_raw)
     days, checked = load_days()
     today = datetime.date.today()

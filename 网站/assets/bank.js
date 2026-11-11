@@ -14,6 +14,21 @@
       rt: (e.retests || []).slice(-1)[0]
     });
   });
+  // 手动录入的错题库（数学/语文/英语），比自动错题多了错因、讲解和变式
+  var SUB_CN = { math: "数", cn: "语", en: "英" };
+  Object.keys(DB.wrong || {}).forEach(function (k) {
+    (DB.wrong[k] || []).forEach(function (w) {
+      var dup = ALL.some(function (x) { return x.id === w.id; });
+      if (dup) return;
+      ALL.push({
+        id: w.id, sub: SUB_CN[k] || "", kp: w["知识点"] || "",
+        stem: w["题目"] || "", ans: w["正确答案"] || "", exp: w["正确思路"] || "",
+        options: [], cause: w["错因说明"] || "", wrong: w["孩子答案"] || "",
+        diff: (w["难度"] || 3) * 2.5, src: "错题"
+      });
+    });
+  });
+
   (DB.variants || []).forEach(function (v) {
     ALL.push({
       id: v.id, sub: v.subject, kp: (v.kps || [])[0] || "",

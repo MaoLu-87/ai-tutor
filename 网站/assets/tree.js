@@ -6,7 +6,7 @@
   var cur = null, opened = {};
   var cache = {}, curSub = "math";
   var SUBS = [{ k: "math", n: "数学" }, { k: "cn", n: "语文" }, { k: "en", n: "英语" }];
-  var doneMap = {}, okMap = {};
+  var doneMap = {}, okMap = {}, kpState = {};
 
   var BOOKS = [];
   for (var g = 1; g <= 6; g++) for (var i = 0; i < 2; i++)
@@ -23,18 +23,23 @@
   }
 
   function colorOf(id, hasQ) {
-    var r = rateOf(id);
-    if (r === null) return hasQ ? "#B4B2A9" : "#DCD5D8";
-    if (r >= 0.8) return "#1D9E75";
-    if (r >= 0.6) return "#EF9F27";
-    return "#E24B4A";
+    var st = kpState[id];
+    if (!st || st.score === null || st.score === undefined) return hasQ ? "#B4B2A9" : "#DCD5D8";
+    var sc = st.score;
+    if (sc >= 85) return "#1D9E75";   // 熟练
+    if (sc >= 70) return "#5B8DEF";   // 掌握
+    if (sc >= 50) return "#EF9F27";   // 待巩固
+    return "#E24B4A";                 // 薄弱
   }
 
   function stateText(id, hasQ) {
-    var r = rateOf(id);
-    if (r === null) return hasQ ? "未测" : "待补题";
-    var d = doneMap[id], o = okMap[id] || 0;
-    return "掌握 " + Math.round(r * 100) + "%（" + o + "/" + d + "）";
+    var st = kpState[id];
+    if (st && st.score !== null && st.score !== undefined) {
+      return "掌握 " + Math.round(st.score) + " 分（" + (st.ok || 0) + "/" + (st.n || 0) + "）";
+    }
+    // 有题但没测过：分数体系里没有记录
+    if (hasQ) return "未测";
+    return "待补题";
   }
 
   function nodeCard(t) {
@@ -42,18 +47,29 @@
     var open = opened[t.id];
     var preN = (pre[t.id] || []).length, sucN = (suc[t.id] || []).length;
 
-    var head = '<div data-id="' + t.id + '" style="display:flex;gap:10px;align-items:flex-start;'
-      + 'padding:9px 0;border-bottom:1px solid #F8EFF2;cursor:pointer">'
-      + '<span style="width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;background:'
-      + colorOf(t.id, hasQ) + '"></span>'
+    var _st = kpState[t.id];
+    var _sc = (_st && _st.score !== null && _st.score !== undefined) ? Math.round(_st.score) : null;
+    var _col = colorOf(t.id, hasQ);
+
+    var head = '<div data-id="' + t.id + '" style="display:flex;gap:12px;align-items:center;'
+      + 'padding:11px 2px 11px 0;border-bottom:1px solid #F7EEF2;cursor:pointer">'
+      + '<span style="width:3px;height:30px;border-radius:2px;flex:none;background:' + _col
+      + ';opacity:' + (hasQ ? '1' : '.4') + '"></span>'
       + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:13.5px;color:#3E3037' + (hasQ ? "" : ";opacity:.65") + '">'
+      + '<div style="font-size:14px;color:#3E3037;line-height:1.45' + (hasQ ? '' : ';opacity:.55') + '">'
       + esc(t.name) + '</div>'
-      + '<div class="meta" style="margin-top:2px">' + stateText(t.id, hasQ)
-      + (preN ? " · 前置 " + preN : "") + (sucN ? " · 后继 " + sucN : "") + '</div>'
+      + '<div class="meta" style="margin-top:3px;font-size:11.5px">'
+      + (hasQ
+          ? ((preN ? '前置 ' + preN : '') + (preN && sucN ? ' · ' : '') + (sucN ? '后继 ' + sucN : ''))
+          : '题库里没有这个点')
+      + '</div></div>'
+      + '<div style="flex:none;text-align:right;min-width:54px;white-space:nowrap">'
+      + (_sc !== null
+          ? '<div style="font-size:16.5px;font-weight:600;line-height:1.2;color:' + _col + '">'
+            + _sc + '<span style="font-size:10.5px;font-weight:400;opacity:.6;margin-left:1.5px">分</span></div>'
+          : '<div style="font-size:11.5px;color:#C4B8BE;line-height:1.5">未测</div>')
       + '</div>'
-      + (open ? '<span class="meta" style="flex:none">收起</span>'
-              : '<span class="meta" style="flex:none">展开</span>')
+      + '<span class="meta" style="flex:none;font-size:10px;opacity:.45;margin-left:2px">' + (open ? '▲' : '▼') + '</span>'
       + '</div>';
 
     if (!open) return head;
@@ -117,9 +133,14 @@
   }
 
   function diagnose() {
+    // 统一用掌握度分数判定（会随时间衰减），不再用答对率
+    function scOf(id) {
+      var st = kpState[id];
+      return (st && st.score !== null && st.score !== undefined) ? st.score : null;
+    }
     var weak = T.topics.filter(function (t) {
-      var d = doneMap[t.id] || 0;
-      return d > 0 && (okMap[t.id] || 0) / d < 0.6;
+      var sc = scOf(t.id);
+      return sc !== null && sc < 60;
     });
     if (!weak.length) return "";
 
@@ -128,10 +149,10 @@
       var ups = traceUp(t.id, 3);
 
       var lowUp = ups.filter(function (u) {
-        var ud = doneMap[u.node.id] || 0;
-        return ud > 0 && (okMap[u.node.id] || 0) / ud < 0.6;
+        var sc = scOf(u.node.id);
+        return sc !== null && sc < 60;
       });
-      var untested = ups.filter(function (u) { return !doneMap[u.node.id]; });
+      var untested = ups.filter(function (u) { return scOf(u.node.id) === null; });
 
       var kind, color, tip, act, actName;
       if (lowUp.length) {
@@ -155,7 +176,8 @@
       }
       var btn = '<a href="drill.html?focus=' + encodeURIComponent(actName) + location.search.replace(/^\?/, "&")
         + '" style="display:inline-block;margin-top:8px;padding:7px 14px;border-radius:999px;'
-        + 'background:' + color + ';color:#fff;font-size:12.5px;text-decoration:none">'
+        + 'background:#E85E86;color:#fff;font-size:12.5px;text-decoration:none;'
+        + 'box-shadow:0 2px 8px rgba(232,94,134,.28)">'
         + act + ' →</a>';
 
       var upTxt = ups.length
@@ -180,10 +202,11 @@
         + '</div></div></div>';
     }).join("");
 
-    return '<details class="card" style="margin-bottom:12px">'
-      + '<summary style="font-weight:500;font-size:13.5px;cursor:pointer">诊断 · '
-      + weak.length + ' 个点答对率不到 60%（点开看结论）</summary>'
-      + '<div class="meta" style="margin:6px 0 4px">沿「要先会」往上找一层，看是地基塌了还是这个点本身没吃透</div>'
+    return '<details class="card" style="margin-bottom:28px;border-left:3px solid #E85E86;'
+      + 'padding-left:15px" open>'
+      + '<summary style="font-weight:600;font-size:13.5px;cursor:pointer;color:#C2456B">'
+      + '要盯的点 · ' + weak.length + ' 个</summary>'
+      + '<div class="meta" style="margin:7px 0 6px">沿「要先会」往上找，看是地基塌了还是这个点没吃透</div>'
       + cards + '</details>';
   }
 
@@ -233,11 +256,16 @@
 
     var html = order.map(function (k) {
       var arr = groups[k];
-      var has = arr.filter(function (t) { return (t.q || []).length; }).length;
-      return '<div class="card" style="margin-bottom:12px">'
-        + '<div class="row" style="margin-bottom:4px"><b style="font-size:13px">'
+      var tested = arr.filter(function (t) {
+        var st = kpState[t.id];
+        return st && st.score !== null && st.score !== undefined;
+      }).length;
+      return '<div class="card" style="margin-bottom:28px;padding:16px 20px 6px;border:1px solid #EED5E1;box-shadow:0 4px 18px rgba(180,90,110,.08)">'
+        + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">'
+        + '<b style="font-size:12.5px;font-weight:500;color:#9B8A92;letter-spacing:.2px">'
         + esc(k.replace(/^.+?册\s*/, "")) + '</b>'
-        + '<span class="meta">' + arr.length + ' 个点 · ' + has + ' 个有题</span></div>'
+        + '<span class="meta" style="font-size:11px">已测 ' + tested + ' / ' + arr.length + '</span>'
+        + '</div>'
         + arr.map(nodeCard).join("") + '</div>';
     }).join("");
 
@@ -252,8 +280,14 @@
     });
 
     var stat = list.filter(function (t) { return (t.q || []).length; }).length;
+    var tested2 = list.filter(function (t) {
+      var st = kpState[t.id];
+      return st && st.score !== null && st.score !== undefined;
+    }).length;
     document.getElementById("t_stat").textContent =
-      cur.g + cur.s + " · " + list.length + " 个知识点 · " + stat + " 个有题";
+      cur.g + cur.s + " · " + list.length + " 个点 · 已测 " + tested2
+      + "　｜　" + ({ math: "数学", cn: "语文", en: "英语" }[curSub] || "")
+      + "全 " + T.topics.length + " 个点";
   }
 
   function renderBooks() {
@@ -351,6 +385,24 @@
       doneMap[tid] = (doneMap[tid] || 0) + 1;
       if (a.ok) okMap[tid] = (okMap[tid] || 0) + 1;
     });
+
+    // Engine.scoreKps 要 window.__tree 里有三科才能全算，这里一次补齐
+    if (!window.__tree) {
+      var _all = {};
+      for (var _i = 0; _i < SUBS.length; _i++) {
+        var _k = SUBS[_i].k;
+        if (!cache[_k]) {
+          try {
+            var _r = await fetch("assets/tree-" + _k + ".json" + location.search);
+            cache[_k] = await _r.json();
+          } catch (e) { cache[_k] = null; }
+        }
+        _all[_k] = cache[_k];
+      }
+      window.__tree = _all;
+      window.__treeIdx = null;   // 让 engine 重建索引
+    }
+    try { kpState = Engine.scoreKps(att) || {}; } catch (e) { kpState = {}; }
 
     renderBooks();
     render();

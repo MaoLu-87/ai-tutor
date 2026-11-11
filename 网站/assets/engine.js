@@ -157,9 +157,30 @@ window.Engine = (function () {
 
   /* ---------- 知识点评分 ---------- */
   /* DB.kpOf = { 题目id: [知识点id, ...] }，构建时算好 */
+  /* tree 体系：题目 id -> 知识点 id，以及知识点 -> 科目。
+     建一次缓存住，1053 个点扫一遍不算贵，但别每次都扫。 */
+  function treeIndex() {
+    if (window.__treeIdx) return window.__treeIdx;
+    var q2t = {}, sub = {};
+    var names = {"math": "数", "cn": "语", "en": "英"};
+    var T = window.__tree || {};
+    Object.keys(names).forEach(function (k) {
+      var t = T[k];
+      if (!t || !t.topics) return;
+      t.topics.forEach(function (tp) {
+        sub[tp.id] = names[k];
+        (tp.q || []).forEach(function (qid) { q2t[qid] = tp.id; });
+      });
+    });
+    window.__treeIdx = { q2t: q2t, sub: sub };
+    return window.__treeIdx;
+  }
+
   function scoreKps(attempts) {
-    var kpOf = (window.DB && window.DB.kpOf) || {};
-    var kpSub = (window.DB && window.DB.kpSub) || {};
+    // 评分只认能对上 tree 的题（开源题库）。自录大纲题和变式题走复测，
+    // 不进这张分数表——它们标的是单元级，对不上 tree 的知识点粒度。
+    var _ti = treeIndex();
+    var q2t = _ti.q2t, kpSub = _ti.sub;
     var state = {};        // kid -> {score, n, ok, last}
 
     function apply(kid, ok, at) {
@@ -183,7 +204,8 @@ window.Engine = (function () {
 
       for (var t = i; t < j; t++) {
         var a = attempts[t];
-        var kids = kpOf[a.item_id] || [];
+        var tid = q2t[a.item_id];
+        var kids = tid ? [tid] : [];
         kids.forEach(function (kid) {
           apply(kid, a.ok, a.at);
           touched[kpSub[kid]] = 1;
@@ -222,13 +244,14 @@ window.Engine = (function () {
   function isTextKp(kid) { return /-\d[AB]-U/.test(kid); }
 
   function subAvg(state, sub) {
-    var kpSub = (window.DB && window.DB.kpSub) || {};
+    var kpSub = treeIndex().sub;   // 分数按 tree 存，科目表也得用 tree 的
     var arr = Object.keys(state)
       .filter(function (k) {
         return kpSub[k] === sub && state[k].score !== null && !isTextKp(k);
       })
       .map(function (k) { return state[k].score; });
-    if (!arr.length) return 50;
+    // 样本少于 3 个时均分不可靠——一道题就能把它拉高或拉低，直接按中等算
+    if (arr.length < 3) return 50;
     return arr.reduce(function (a, b) { return a + b; }, 0) / arr.length;
   }
 
@@ -405,16 +428,21 @@ window.Engine = (function () {
       } else {
         judge = "快而错";
         harder = true;
-        need = prevN + FQ_ADD;
-        why = "十几秒一道题，对五年级来说不正常——不是题简单就是没读透。"
-            + "题数加一题，难度往上提一档，把速度换成思考";
+        // 不再把题数压回 prevN+1：题量本来就该按「目标 900 秒 ÷ 实际每题秒」反推，
+        // 压回上一组题数等于把 15 分钟的预算扔掉，只剩 2 分钟的量。
+        why = "十几秒一道题，对五年级来说太快了——不是题太简单就是没读透。"
+            + "题数按实际用时反推到 {N} 题，同时把难度提一档";
       }
     }
 
-    var n = Math.max(prevN - STEP, Math.min(prevN + STEP, need));
+    // 差得远就一次多迈几步。原来固定 ±2，从 10 题爬到这里算出来的 30 题要爬十天，
+    // 中间每一天都还是「2 分钟做完」。
+    var gap = need - prevN;
+    var step = Math.max(2, Math.min(STEP, Math.ceil(Math.abs(gap) / 3)));
+    var n = prevN + Math.max(-step, Math.min(step, gap));
     n = Math.max(N_MIN, Math.min(N_MAX, n));
-    if (n === 6 && (judge === "太慢" || judge === "又慢又错")) why = "题量已经压到 6 题，再减就没意义了；这一档先练速度——同样的题，目标 15 分钟内做完";
-    else if (n === 12 && (judge === "太快" || judge === "偏快")) why = "题量已经到 12 题上限；再想加挑战，只能换更难的知识点";
+    if (n === N_MIN && (judge === "太慢" || judge === "又慢又错")) why = "题量已经压到 " + N_MIN + " 题，再减就没意义了；这一档先练速度——同样的题，目标 15 分钟内做完";
+    else if (n === N_MAX && (judge === "太快" || judge === "偏快" || judge === "快而错")) why = "题量已经到 " + N_MAX + " 题上限；再想加训练量，只能换更长、更难的题目";
 
     return { n: n, focus: focus, perSec: per, ratio: r, acc: acc, harder: harder,
              estMin: n * per / 60, judge: judge, why: why.replace("{N}", n), groups: list };
@@ -502,12 +530,10 @@ window.Engine = (function () {
       var kid = pool[i].kp || (kpOf[pool[i].id] || [])[0];
       if (kid && kpState[kid] && kpState[kid].score !== null) { sc = kpState[kid].score; break; }
     }
-    var tgt = targetDiff(sc);
+    var tgt = wantBand(sc);
 
     var ranked = pool.map(function (q) {
-      var qd = q.source === "tax" ? (q.difficulty || 4)
-             : (q["难度分"] || (q.difficulty ? q.difficulty * 2.5 : 4));
-      return { q: q, gap: Math.abs(qd - tgt) };
+      return { q: q, gap: Math.abs(qBand(q) - tgt) };
     });
     ranked.sort(function (a, b) { return a.gap - b.gap; });
 
@@ -565,8 +591,10 @@ window.Engine = (function () {
   var DIFF_LADDER = Q["难度"] && Q["难度"]["分档"] ? Q["难度"]["分档"]
     : [{ "分": 80, "难度": 6 }, { "分": 70, "难度": 5 }, { "分": 0, "难度": 4 }];
   var DIFF_FLOOR = num(Q["难度"] || {}, "下限", 4);
+  var DQ = Q["难度档"] || {};
+  var D_HI = num(DQ, "高档分", 80), D_MID = num(DQ, "中档分", 60);
+  var KP_PER_GROUP = num(Q, "同组同知识点上限", 1);
   var FQ_CFG = Q["快而错"] || {};
-  var FQ_ADD = num(FQ_CFG, "加题", 1);
   var FQ_DIFF = num(FQ_CFG, "难度加", 1);
 
   function targetDiff(score) {
@@ -579,7 +607,27 @@ window.Engine = (function () {
     return DIFF_FLOOR;
   }
 
-  function pickOutlineFor(subject, kpState, used, rand, kpName, recent, learned, taxItems, harder) {
+  /* 难度统一成三档，避免"1–10 连续分"和"1/2/3 档"混着比 */
+  function qBand(q) {
+    if (q.source === "tax") {
+      var d = q.difficulty || 4;         // 开源题 5 维评分，1–10
+      return d >= 7 ? 3 : d >= 4 ? 2 : 1;
+    }
+    // 大纲题的字段是中文「难度」(1/2/3)，变式题是英文 difficulty
+    return q["难度"] || q.difficulty || 2;
+  }
+  function wantBand(sc, harder, quick) {
+    var w;
+    if (sc === null || sc === undefined) w = 2;
+    else if (sc >= D_HI) w = 3;
+    else if (sc >= D_MID) w = 2;
+    else w = 1;
+    // 秒答过：这个知识点出的题偏简单，往上顶一档
+    if (quick) w = Math.min(3, w + 1);
+    return harder ? Math.min(3, w + 1) : w;
+  }
+
+  function pickOutlineFor(subject, kpState, used, rand, kpName, recent, learned, taxItems, harder, kpUsed, quickSet) {
     var all = ((window.DB && window.DB.outline) || []).concat(taxItems || []);
     var kpOf = (window.DB && window.DB.kpOf) || {};
     var pool = all.filter(function (q) {
@@ -615,17 +663,26 @@ window.Engine = (function () {
     var cand = pool;
 
     var items = cand.map(function (q) {
-      var kid = q.kp || (kpOf[q.id] || [])[0];
+      // 知识点改认 tree 的 id：评分表现在按 tree 存，旧 kpOf 查不到就是 null
+      var kid = q.kp || (q.id && treeIndex().q2t[q.id]) || (kpOf[q.id] || [])[0];
       var st = kid ? kpState[kid] : null;
       var sc = st && st.score !== null ? st.score : null;
-      var qd = q.source === "tax" ? (q.difficulty || 4)
-             : (q["难度分"] || (q.difficulty ? q.difficulty * 2.5 : 4));
-        var tgt = targetDiff(sc) + (harder ? FQ_DIFF : 0);
-      var gap = Math.abs(qd - Math.min(9, tgt));
-      var base = 1 / (1 + gap) + (same.length && same.indexOf(q) >= 0 ? 0.6 : 0);
+      // 目标档：1 基础 / 2 中等 / 3 较难。
+      // 以前是拿 1–10 的连续分去"撞"，大纲题 1/2/3 乘 2.5 变成 2.5/5/7.5，
+      // 撞上 4–6 的目标区间永远命中中间那档，难度 3 基本出不来。
+      var wantD = wantBand(sc, harder, !!(quickSet && kid && quickSet[kid]));
+      var gap = Math.abs(qBand(q) - wantD);
+      var base = 1 / (1 + gap * 2) + (same.length && same.indexOf(q) >= 0 ? 0.6 : 0);
       if (q.source === "tax") base += 0.8;   // 开源题覆盖广，给点加成免得被大纲题压住
-      return { q: q, w: base };
+      if (q.slow) base *= 1.8;               // 慢题优先：一组全是两秒能答完的短选择题等于没练
+      // 本组已经出过这个知识点了，重罚——一组里连着三四道「用字母表示数」最劝退
+      if (kpUsed && kid && kpUsed[kid]) base *= 0.15;
+      return { q: q, w: base, gap: gap };
     });
+
+    // 目标档有题就只出目标档的：掌握度 80 分以上还让她做基础题，等于白做
+    var hit = items.filter(function (x) { return x.gap === 0; });
+    if (hit.length) items = hit;
 
     var tot = 0;
     items.forEach(function (x) { tot += x.w; });
@@ -648,9 +705,11 @@ window.Engine = (function () {
       w[s] = Math.max(SUB_MIN_W, (100 - (subScore[s] === undefined ? 50 : subScore[s])) / 100);
       tot += w[s];
     });
+    // 单科上限 40%：某一科再弱也不该占掉一半以上，否则孩子一天都在做同一科
+    var capSub = Math.max(2, Math.ceil(total * 0.4));
     var want = {}, sum = 0;
     SUB_ORDER.forEach(function (s) {
-      want[s] = Math.max(1, Math.round(total * w[s] / tot));
+      want[s] = Math.min(Math.max(1, Math.round(total * w[s] / tot)), capSub);
       sum += want[s];
     });
     var order = SUB_ORDER.slice().sort(function (a, b) { return w[b] - w[a]; });
@@ -660,14 +719,36 @@ window.Engine = (function () {
       }
       if (order.every(function (s) { return want[s] <= 1; })) break;
     }
-    while (sum < total) { want[order[0]]++; sum++; }
+    while (sum < total) {
+      var bumped = false;
+      for (var j = 0; j < order.length && sum < total; j++) {
+        if (want[order[j]] < capSub) { want[order[j]]++; sum++; bumped = true; }
+      }
+      if (!bumped) { want[order[0]]++; sum++; }   // 全都顶格了，只能给权重最大的
+    }
     return want;
   }
 
-  function planDay(dateStr, groupNo, kpState, pace, recentSet, overdueList, taxItems) {
+  function planDay(dateStr, groupNo, kpState, pace, recentSet, overdueList, taxItems, att) {
     var variants = (window.DB && window.DB.variants) || [];
     var kpOf = (window.DB && window.DB.kpOf) || {};
     var rand = rng(hashSeed(dateStr + "#" + groupNo));
+    // 第一组还账：到期复测 + 薄弱点，偏简单
+    // 第二组推进：没测过的点 + 已经稳的点，偏难一档
+    var isReview = (groupNo === 1);
+    var harder = isReview ? false : true;
+
+    // 秒答信号：某个知识点 5 秒内答对过 2 次以上，说明出的题太简单
+    var QUICK_SEC = 5, QUICK_TIMES = 2;
+    var quickCnt = {}, quickSet = {};
+    (att || []).forEach(function (a) {
+      if (!a || !a.ok || !a.sec || a.sec > QUICK_SEC) return;
+      var kid = (kpOf[a.item_id] || [])[0];
+      if (kid) quickCnt[kid] = (quickCnt[kid] || 0) + 1;
+    });
+    Object.keys(quickCnt).forEach(function (kid) {
+      if (quickCnt[kid] >= QUICK_TIMES) quickSet[kid] = 1;
+    });
 
     var subScore = {};
     SUB_ORDER.forEach(function (s) { subScore[s] = subAvg(kpState, s); });
@@ -693,10 +774,10 @@ window.Engine = (function () {
     (overdueList || []).forEach(function (id) { overdueIds[id] = 1; });
     var pickedUp = 0;
 
-    // 第一优先：到期待复测的错题，先给它出一道变式（上限 40%，别让一天全是复测）
-    var cap = Math.ceil(n * 2 * 0.4);
-    (overdueList || []).forEach(function (errId) {
-      if (pickedUp >= cap) return;
+    // 第一优先：到期待复测的错题，全部出，不再设 40% 上限
+    // （2026-11-10 改：欠账要清零，宁可这一组做久一点）
+    // （2026-11-11 改：只给第一组，第二组不碰旧账，专心往前推）
+    (isReview ? (overdueList || []) : []).forEach(function (errId) {
       var vs = variants.filter(function (v) {
         // 逾期复习就是要重做，不受「近 7 天做过」限制
         return v.from === errId && !usedIds[v.id];
@@ -717,9 +798,6 @@ window.Engine = (function () {
         return;
       }
       var v = vs[Math.floor(rand() * vs.length)];
-      // 每科的逾期题最多占该科配额一半，剩下的位置留给新题（大纲 / 开源题库）
-      var capSub = Math.max(1, Math.floor((q[v.subject] || 2) / 2));
-      if ((usedBySub[v.subject] || 0) >= capSub) return;
       usedIds[v.id] = 1;
       overdueIds[v.id] = 1;
       usedBySub[v.subject] = (usedBySub[v.subject] || 0) + 1;
@@ -731,7 +809,15 @@ window.Engine = (function () {
     SUB_ORDER.forEach(function (s) {
       var pool = variants.filter(function (v) { return v.subject === s; });
       // 逾期题已经占掉的名额，从这一科的配额里扣掉；总数不能超过 n*2
-      var want = Math.min(Math.max(0, q[s] - (usedBySub[s] || 0)), remaining);
+      var wantTotal = Math.min(Math.max(0, q[s] - (usedBySub[s] || 0)), remaining);
+      // 当前学期 / 之前学期的比例不是死板对半，看三科整体均分：
+      // 整体弱（<60）就多练当前学期，整体强（>60）就多回头复习。
+      var _sc = [subScore["数"], subScore["语"], subScore["英"]].map(function (x) {
+        return x === undefined || x === null ? 50 : x;
+      });
+      var _overall = (_sc[0] + _sc[1] + _sc[2]) / 3;
+      var prevRatio = Math.max(0.2, Math.min(0.8, 0.5 + (_overall - 60) / 100));
+      var want = Math.max(0, Math.round(wantTotal * (1 - prevRatio)));
       // 按知识点分组加权
       var byKp = {};
       pool.forEach(function (v) {
@@ -747,16 +833,39 @@ window.Engine = (function () {
 
       var chosen = [];
       var guard = 0;
+      // 同一个知识点在一组里最多出几道。默认 1 道——连出三道「阅读速度」，
+      // 孩子会觉得在重复做同一道题。池子不够再逐级放开。
+      var kpCount = {}, kpCap = Math.max(1, KP_PER_GROUP);
+      // 逾期复习阶段已经选走的题也占名额，否则补足时又堆回同一个知识点
+      picked.forEach(function (v) {
+        var k = (kpOf[v.id] || [])[0];
+        if (k) kpCount[k] = (kpCount[k] || 0) + 1;
+      });
       while (chosen.length < want && guard++ < 200) {
-        // 按权重挑一个知识点；权重全为 0 说明这个科目已经没题可选了
-        var tot = 0;
-        kpIds.forEach(function (kid) { tot += wt[kid]; });
-        if (tot <= 0) break;
-        var r = rand() * tot, pickKp = kpIds[0];
-        for (var i = 0; i < kpIds.length; i++) {
-          r -= wt[kpIds[i]];
-          if (r <= 0) { pickKp = kpIds[i]; break; }
+        // 第一组只挑弱项（<70），第二组只挑未测或已稳（>=70）。
+        // 先严格过滤；过滤完没题就放开，否则第二组会空。
+        var kpScore = function (k) {
+          var st = kpState[k];
+          return (st && st.score !== null && st.score !== undefined) ? st.score : 100;
+        };
+        var kpFit = function (k) {
+          var sc = kpScore(k);
+          return isReview ? sc < 70 : sc >= 70;
+        };
+        var availBase = kpIds.filter(function (k) {
+          return wt[k] > 0 && (kpCount[k] || 0) < kpCap &&
+            byKp[k].some(function (v) { return chosen.indexOf(v) < 0 && !usedIds[v.id]; });
+        });
+        var avail = availBase.filter(kpFit);
+        if (!avail.length) avail = availBase;   // 这一科没合适的点，放开
+        if (!avail.length) {
+          if (kpCap >= 3) break;      // 放开到 3 道仍然没得选，说明这一科真的没题了
+          kpCap++; continue;
         }
+        // 按掌握度升序取最低的那个点（原来是加权随机）。
+        // 没测过的记 100 分排在最后——先补已知薄弱，再摸底未知。
+        avail.sort(function (a, b) { return kpScore(a) - kpScore(b); });
+        var pickKp = avail[0];
         var arr = byKp[pickKp].filter(function (v) {
           // usedIds 里的是逾期阶段已经选走的，不能再选一次（否则同一道题会出现两遍）
           return chosen.indexOf(v) < 0 && !usedIds[v.id];
@@ -767,66 +876,138 @@ window.Engine = (function () {
         var src = fresh.length ? fresh : arr;
         var v = src[Math.floor(rand() * src.length)];
         chosen.push(v);
+        kpCount[pickKp] = (kpCount[pickKp] || 0) + 1;
       }
       // 变式池不够（语文只有 6 道），用大纲题补足，保证每组题数稳定
       while (chosen.length < want) {
-        var fill = pickOutlineFor(s, kpState, usedIds, rand, "", recent, learned, taxItems, pace.harder);
+        var fill = pickOutlineFor(s, kpState, usedIds, rand, "", recent, learned, taxItems, harder, kpCount, quickSet);
         if (!fill) break;
         usedIds[fill.id] = 1;
         chosen.push(fill);
+        var _fk = (kpOf[fill.id] || [])[0];
+        if (_fk) kpCount[_fk] = (kpCount[_fk] || 0) + 1;
       }
+      // 之前学期（一到四年级）：补足另一半配额，按掌握度升序
+      // 这些册早就学过，靠衰减慢慢掉分，掉了说明该回头练
+      var prevQuota = wantTotal - chosen.length;
+      if (prevQuota > 0) {
+        var prevPool = (taxItems || []).concat((window.DB && window.DB.outline) || [])
+          .filter(function (v) {
+            if (!v || usedIds[v.id] || !v.book) return false;
+            if (!/^[1-4](上|下)$/.test(v.book)) return false;
+            if (recent && recent[v.id]) return false;
+            if (learned && v.book) {
+              // tax 里册次是「1上」，curriculum 里是「一上」，先统一再比
+              var BOOK_CN = { "1": "一", "2": "二", "3": "三", "4": "四", "5": "五", "6": "六" };
+              var bookCn = String(v.book).replace(/^([1-6])/, function (m) { return BOOK_CN[m]; });
+              var okBook = false;
+              for (var lk in learned) {
+                if (lk.indexOf(v.subject + "|" + bookCn + "|") === 0 && learned[lk] !== "未学") { okBook = true; break; }
+              }
+              if (!okBook) return false;
+            }
+            return true;
+          });
+        var ti = treeIndex().q2t;
+        // 第一组补弱项，第二组补没测过 / 已经稳的
+        var _prevFit = function (v) {
+          var k = ti[v.id];
+          var sc = (k && kpState[k] && kpState[k].score !== null && kpState[k].score !== undefined)
+            ? kpState[k].score : 100;
+          return isReview ? sc < 70 : sc >= 70;
+        };
+        var _prevAll = prevPool.slice();
+        prevPool = prevPool.filter(_prevFit);
+        if (!prevPool.length) prevPool = _prevAll;
+        prevPool.sort(function (a, b) {
+          var ka = ti[a.id], kb = ti[b.id];
+          var sa = (ka && kpState[ka] && kpState[ka].score !== null && kpState[ka].score !== undefined)
+            ? kpState[ka].score : 100;
+          var sb = (kb && kpState[kb] && kpState[kb].score !== null && kpState[kb].score !== undefined)
+            ? kpState[kb].score : 100;
+          return sa - sb;
+        });
+        var takenPrev = 0;
+        for (var pi = 0; pi < prevPool.length && takenPrev < prevQuota; pi++) {
+          var pv = prevPool[pi];
+          if (usedIds[pv.id]) continue;
+          usedIds[pv.id] = 1;
+          chosen.push(pv);
+          takenPrev++;
+        }
+      }
+
       picked = picked.concat(chosen);
       remaining -= chosen.length;
     });
 
     // 近 7 天做过的变式，换成同知识点的大纲题——错题复习靠间隔，重复做同一道没意义
     picked.forEach(function (v) { usedIds[v.id] = 1; });
+    var kpAll = {};
+    picked.forEach(function (v) { var k = (kpOf[v.id] || [])[0]; if (k) kpAll[k] = (kpAll[k] || 0) + 1; });
     picked = picked.map(function (v) {
       // 逾期题必须重做，不能被「近期做过」换掉
       if (!recent[v.id] || overdueIds[v.id]) return v;
-      var alt = pickOutlineFor(v.subject, kpState, usedIds, rand, (v.kps || [])[0] || "", recent, learned, taxItems, pace.harder);
+      var alt = pickOutlineFor(v.subject, kpState, usedIds, rand, (v.kps || [])[0] || "", recent, learned, taxItems, harder, kpAll, quickSet);
       if (!alt) return v;
       usedIds[alt.id] = 1;
       return alt;
     });
 
-    // 分两组：按科目轮流发，避免某一组全是语文
-    var bySub = {};
-    picked.forEach(function (v) {
-      (bySub[v.subject] || (bySub[v.subject] = [])).push(v);
-    });
-    var g1 = [], g2 = [];
-    SUB_ORDER.forEach(function (s) {
-      var arr = bySub[s] || [];
-      // 科目内先打乱，免得每次都抽到题库最前面那几道
-      arr.sort(function () { return rand() - 0.5; });
-      arr.forEach(function (v, i) { (i % 2 === 0 ? g1 : g2).push(v); });
-    });
-    // 剩余科目（如果有）
-    Object.keys(bySub).forEach(function (s) {
-      if (SUB_ORDER.indexOf(s) >= 0) return;
-      bySub[s].forEach(function (v, i) { (i % 2 === 0 ? g1 : g2).push(v); });
-    });
-
-    // 两组题数差不超过 1：从多的那组挪一道「该科目明显偏多」的过去
-    while (g1.length - g2.length > 1) {
-      var ca = {}, cb = {};
-      g1.forEach(function (v) { ca[v.subject] = (ca[v.subject] || 0) + 1; });
-      g2.forEach(function (v) { cb[v.subject] = (cb[v.subject] || 0) + 1; });
-      var idx = -1;
-      for (var i = g1.length - 1; i >= 0; i--) {
-        if ((ca[g1[i].subject] || 0) - (cb[g1[i].subject] || 0) > 1) { idx = i; break; }
+    // 每组至少一道慢题。短选择题两秒就能答完，一组全是这种题等于白练。
+    // 不够就从池子里补，换掉一道「不是逾期、也不是慢题」的普通题，总数不变。
+    var SLOW_PER_GROUP = 1;
+    var slowPool = ((window.DB && window.DB.outline) || []).concat(taxItems || [])
+      .filter(function (q) { return q.slow && !usedIds[q.id]; });
+    var haveSlow = picked.filter(function (v) { return v.slow; }).length;
+    var needSlow = SLOW_PER_GROUP * 2 - haveSlow;
+    while (needSlow > 0 && slowPool.length) {
+      var cand = slowPool.splice(Math.floor(rand() * slowPool.length), 1)[0];
+      var ri = -1;
+      for (var qi = picked.length - 1; qi >= 0; qi--) {
+        if (!picked[qi].slow && !overdueIds[picked[qi].id]) { ri = qi; break; }
       }
-      if (idx < 0) idx = g1.length - 1;
-      g2.push(g1.splice(idx, 1)[0]);
+      if (ri < 0) break;
+      usedIds[cand.id] = 1;
+      picked[ri] = cand;
+      needSlow--;
     }
-    while (g2.length - g1.length > 1) {
-      g1.push(g2.pop());
+
+    // 分两组：第一组专做到期的错题（欠账清零），第二组做新题和巩固。
+    var g1 = [], g2 = [];
+    picked.forEach(function (v) {
+      if (overdueIds[v.id]) g1.push(v);
+      else g2.push(v);
+    });
+    // 第一组不足一组题量时，从第二组挪过来补足——「做不满 15 分钟就补别的」
+    while (g1.length < n && g2.length > 0) {
+      g1.push(g2.shift());
     }
+
+
+    // 分组时慢题可能被分堆到同一组，这里保证两组各至少一道
+    function slowCount(g) { return g.filter(function (v) { return v.slow; }).length; }
+    if (slowCount(g1) === 0 || slowCount(g2) === 0) {
+      var from = slowCount(g1) > slowCount(g2) ? g1 : g2;
+      var to = from === g1 ? g2 : g1;
+      if (slowCount(from) >= 2) {
+        var si = -1, ti = -1;
+        for (var a = 0; a < from.length; a++) { if (from[a].slow) { si = a; break; } }
+        for (var b = to.length - 1; b >= 0; b--) {
+          if (!to[b].slow && !overdueIds[to[b].id]) { ti = b; break; }
+        }
+        if (si >= 0 && ti >= 0) {
+          var sv = from[si]; from[si] = to[ti]; to[ti] = sv;
+        }
+      }
+    }
+
     return {
       date: dateStr,
       n: n,
       judge: pace.judge,
+      perSec: pace.perSec,
+      acc: pace.acc,
       minutes: TARGET_SEC / 60,   // 时长是硬约束，永远 15 分钟；变的只有题量和难度
       quota: q,
       subScore: subScore,
